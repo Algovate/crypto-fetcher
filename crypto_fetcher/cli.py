@@ -51,27 +51,41 @@ def validate_exchange(func: Callable) -> Callable:
 
 def handle_output(data: Any, format_type: str, output_file: Optional[str]) -> None:
     """Handle output formatting and file saving."""
-    formatter = get_formatter(format_type)
-
-    if hasattr(data, '__iter__') and not isinstance(data, (str, dict)):
-        # Handle list data (OHLCV)
-        formatted_output = formatter.format_ohlcv(data)
-    elif isinstance(data, dict) and 'symbol' in data:
-        # Handle single ticker data
-        formatted_output = formatter.format_ticker(data)
-    else:
-        # Handle multiple tickers
-        formatted_output = formatter.format_multiple_tickers(data)
-
-    if format_type == 'table':
-        console.print(formatted_output)
-    else:
-        console.print(formatted_output)
-
     if output_file:
+        # For file output, always use JSON or CSV format to avoid Rich Table issues
+        if format_type == 'table':
+            # Convert table format to JSON for file output
+            file_formatter = get_formatter('json')
+        else:
+            file_formatter = get_formatter(format_type)
+        
+        # Format data for file
+        if hasattr(data, '__iter__') and not isinstance(data, (str, dict)):
+            formatted_output = file_formatter.format_ohlcv(data)
+        elif isinstance(data, dict) and 'symbol' in data:
+            formatted_output = file_formatter.format_ticker(data)
+        else:
+            formatted_output = file_formatter.format_multiple_tickers(data)
+        
+        # Save to file
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(formatted_output)
         console.print(f"[green]💾 Data saved to {output_file}[/green]")
+    else:
+        # Display on console using original format
+        formatter = get_formatter(format_type)
+        
+        if hasattr(data, '__iter__') and not isinstance(data, (str, dict)):
+            formatted_output = formatter.format_ohlcv(data)
+        elif isinstance(data, dict) and 'symbol' in data:
+            formatted_output = formatter.format_ticker(data)
+        else:
+            formatted_output = formatter.format_multiple_tickers(data)
+        
+        if format_type == 'table':
+            console.print(formatted_output)
+        else:
+            console.print(formatted_output)
 
 
 def parse_timestamp(timestamp_str: str) -> int:
