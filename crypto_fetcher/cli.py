@@ -25,6 +25,7 @@ console = Console()
 
 @click.group()
 @click.version_option(version="0.1.0")
+@click.help_option('-h', '--help')
 def main():
     """Crypto Fetcher - A CLI tool to fetch cryptocurrency data."""
     pass
