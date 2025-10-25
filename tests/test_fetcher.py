@@ -1,7 +1,7 @@
 """Tests for the fetcher module."""
 
 import pytest
-from crypto_fetcher.fetcher import CryptoFetcher
+from crypto_fetcher.fetcher import CryptoFetcher, ExchangeNotAvailableError
 
 
 class TestCryptoFetcher:
@@ -24,7 +24,7 @@ class TestCryptoFetcher:
         """Test handling of invalid exchange names."""
         fetcher = CryptoFetcher()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ExchangeNotAvailableError):
             fetcher.fetch_ticker("invalid_exchange", "BTC/USDT")
 
     def test_validate_symbol(self):

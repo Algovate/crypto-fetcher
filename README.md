@@ -1,6 +1,6 @@
 # Crypto Fetcher
 
-A powerful CLI tool to fetch cryptocurrency data from multiple exchanges using CCXT. Get real-time prices, historical data, and more with a simple command-line interface.
+A powerful CLI tool to fetch cryptocurrency data from multiple exchanges. Get real-time prices, historical data, and more with a simple command-line interface.
 
 ## Features
 
@@ -8,7 +8,6 @@ A powerful CLI tool to fetch cryptocurrency data from multiple exchanges using C
 - 📊 **Real-time Data**: Live ticker prices with watch mode
 - 📈 **Historical Data**: OHLCV data with customizable timeframes
 - 🎨 **Beautiful Output**: Rich terminal tables, JSON, and CSV formats
-- ⚡ **Fast & Reliable**: Built with CCXT for maximum compatibility
 - 🔄 **Watch Mode**: Continuous monitoring with configurable intervals
 - 📁 **Export Support**: Save data to files
 - 🛡️ **Smart Error Handling**: User-friendly error messages with helpful suggestions
@@ -112,18 +111,36 @@ Options:
   -s, --symbol TEXT       Trading pair symbol (required)
   -t, --timeframe [1m|5m|15m|30m|1h|4h|1d|1w]  Timeframe (default: 1h)
   -l, --limit INTEGER     Number of records to fetch (default: 100)
+  --until TEXT            End time (Unix timestamp or ISO 8601 format, e.g., 2024-01-31)
   -f, --format [table|json|csv]  Output format (default: table)
   -o, --output TEXT       Save output to file
 ```
 
+**Two modes supported:**
+
+1. **Only `--limit`**: Get latest N records
+2. **`--limit` + `--until`**: Get N records ending at specified time
+
+**Smart Limit Handling:**
+
+- Automatically handles exchange API limits (e.g., Coinbase: 300, Binance: 1000)
+- Uses pagination for large requests to avoid timeouts
+- Seamlessly fetches any amount of data regardless of exchange restrictions
+
 **Examples:**
 
 ```bash
-# 1-hour candles for last 24 hours
+# Get latest 24 hours of 1-hour candles
 crypto-fetcher history --exchange coinbase --symbol BTC/USD --timeframe 1h --limit 24
 
-# Daily data for last 30 days
-crypto-fetcher history --exchange coinbase --symbol BTC/USD --timeframe 1d --limit 30 --format csv
+# Get 30 days of daily data ending at 2024-01-31
+crypto-fetcher history --exchange coinbase --symbol BTC/USD --timeframe 1d --limit 30 --until "2024-01-31"
+
+# Get 10 hours of data ending at specific time (Unix timestamp)
+crypto-fetcher history --exchange coinbase --symbol BTC/USD --timeframe 1h --limit 10 --until "1704067200000"
+
+# Get large amounts of data (automatically uses pagination)
+crypto-fetcher history --exchange coinbase --symbol BTC/USD --timeframe 1h --limit 1000
 ```
 
 ### `multi-ticker` - Get Multiple Symbol Prices
@@ -264,6 +281,7 @@ crypto-fetcher multi-ticker --exchange coinbase --symbols "BTC/USD,ETH/USD,ADA/U
 ## Error Handling
 
 The tool provides user-friendly error messages with helpful suggestions:
+
 - 🌐 **Network Errors**: Clear connection issue guidance
 - ❌ **Invalid Exchanges**: Shows available exchanges
 - 🔍 **Invalid Symbols**: Provides search suggestions
@@ -272,6 +290,7 @@ The tool provides user-friendly error messages with helpful suggestions:
 - 🔧 **Service Maintenance**: Indicates temporary unavailability
 
 ### Example Error Messages
+
 ```bash
 ❌ Exchange 'invalid_exchange' is not available.
 Available exchanges: coinbase, kraken, okx, kucoin
@@ -302,19 +321,3 @@ The tool uses CCXT, so adding new exchanges is as simple as adding them to the `
 ## License
 
 MIT License - see LICENSE file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## Support
-
-For issues and questions:
-
-- Check the [Issues](https://github.com/your-repo/crypto-fetcher/issues) page
-- Create a new issue with detailed information
-- Include exchange, symbol, and error messages
